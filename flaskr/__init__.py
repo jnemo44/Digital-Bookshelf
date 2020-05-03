@@ -8,6 +8,18 @@ from models import setup_db, Book
 
 BOOKS_PER_SHELF = 8
 
+def paginate_books(reguest, selection):
+    page = reguest.args.get('page',1,type=int)
+    start = (page-1)*BOOKS_PER_SHELF
+    end = start+BOOKS_PER_SHELF
+
+    books = [book.format() for book in selection]
+    current_books = books[start:end]
+
+    return current_books
+
+
+
 # @TODO: General Instructions
 #   - As you're creating endpoints, define them and then search for 'TODO' within the frontend to update the endpoints there. 
 #     If you do not update the endpoints, the lab will not work - of no fault of your API code! 
@@ -33,15 +45,27 @@ def create_app(test_config=None):
   #         update the frontend to handle additional books in the styling and pagination
   #         Response body keys: 'success', 'books' and 'total_books'
   # TEST: When completed, the webpage will display books including title, author, and rating shown as stars
+  @app.route('/books', methods=['GET'])
+  def get_books():
+      selection = Book.query.order_by(Book.id).all()
+      current_books = paginate_books(request, selection)
 
-
-  
+      if len(current_books) == 0:
+        abort(404)
+      
+      return jsonify({
+          'success':True,
+          'books': current_books,
+          'total_books':len(Book.query.all())
+        })
 
   # @TODO: Write a route that will update a single book's rating. 
   #         It should only be able to update the rating, not the entire representation
   #         and should follow API design principles regarding method and route.  
   #         Response body keys: 'success'
   # TEST: When completed, you will be able to click on stars to update a book's rating and it will persist after refresh
+  #@app.route('/books/<int:id>/review', methods=['PATCH'])
+  #def edit_rating(id):
 
 
   # @TODO: Write a route that will delete a single book. 
@@ -49,11 +73,25 @@ def create_app(test_config=None):
   #        Response body keys: 'success', 'books' and 'total_books'
 
   # TEST: When completed, you will be able to delete a single book by clicking on the trashcan.
+  @app.route('/books/<int:id>/delete', methods=['DELETE'])
+  def delete_book(id):
+        print (Book.query.filter_by(Book.id==id).all())
+    #Check to see if book exsists in db
+    #if (Book.query.filter_by(Book.id==id).all()) 
+    
+    #Delete book in the database
+    #Book.query.filter_by(Book.id==id).delete()
+
+      
+
 
 
   # @TODO: Write a route that create a new book. 
   #        Response body keys: 'success', 'created'(id of created book), 'books' and 'total_books'
   # TEST: When completed, you will be able to a new book using the form. Try doing so from the last page of books. 
-  #       Your new book should show up immediately after you submit it at the end of the page. 
+  #       Your new book should show up immediately after you submit it at the end of the page.
+  #@app.route('/books/<int:id>', methods=['POST'])
+  #def add_book(id):
+
   
   return app
