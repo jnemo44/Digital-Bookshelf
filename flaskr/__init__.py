@@ -47,25 +47,49 @@ def create_app(test_config=None):
   # TEST: When completed, the webpage will display books including title, author, and rating shown as stars
   @app.route('/books', methods=['GET'])
   def get_books():
-      selection = Book.query.order_by(Book.id).all()
-      current_books = paginate_books(request, selection)
+    selection = Book.query.order_by(Book.id).all()
+    current_books = paginate_books(request, selection)
 
-      if len(current_books) == 0:
+    if len(current_books) == 0:
         abort(404)
-      
-      return jsonify({
-          'success':True,
-          'books': current_books,
-          'total_books':len(Book.query.all())
-        })
+    
+    return jsonify({
+        'success':True,
+        'books': current_books,
+        'total_books':len(Book.query.all())
+    })
 
   # @TODO: Write a route that will update a single book's rating. 
   #         It should only be able to update the rating, not the entire representation
   #         and should follow API design principles regarding method and route.  
   #         Response body keys: 'success'
   # TEST: When completed, you will be able to click on stars to update a book's rating and it will persist after refresh
-  #@app.route('/books/<int:id>/review', methods=['PATCH'])
-  #def edit_rating(id):
+  @app.route('/books/<int:book_id>', methods=['PATCH'])
+  def edit_rating(book_id):
+      
+    body = request.get_json()
+      
+    try:
+        selected_book = Book.query.filter(Book.id==book_id).one_or_none()
+
+        #Check to see if the book exsists
+        if selected_book is None:
+            #Book not found
+            abort(404)
+        #Find a specified rating in the request body
+        if 'rating' in body:
+            selected_book.rating = int(body.get('rating'))
+        
+        #Update the record in the db
+        selected_book.update()
+
+        return jsonify({
+            'success':True,
+            'book_updated':book_id
+        })
+    except:
+        abort(400)
+        
 
 
   # @TODO: Write a route that will delete a single book. 
@@ -73,25 +97,61 @@ def create_app(test_config=None):
   #        Response body keys: 'success', 'books' and 'total_books'
 
   # TEST: When completed, you will be able to delete a single book by clicking on the trashcan.
-  @app.route('/books/<int:id>/delete', methods=['DELETE'])
-  def delete_book(id):
-        print (Book.query.filter_by(Book.id==id).all())
-    #Check to see if book exsists in db
-    #if (Book.query.filter_by(Book.id==id).all()) 
-    
-    #Delete book in the database
-    #Book.query.filter_by(Book.id==id).delete()
+  @app.route('/books/<int:book_id>', methods=['DELETE'])
+  def delete_book(book_id):
+    try:
+        selected_book = Book.query.filter(Book.id==book_id).one_or_none()
 
-      
+        if selected_book is None:
+            #Book not found
+            abort(404)
+        else:
+            #Delete the book
+            selected_book.delete()
+            #Query the db to GET updated info
+            selection = Book.query.order_by(Book.id).all()
+            current_books = paginate_books(request, selection)
 
+        return jsonify({
+            "success":True,
+            "deleted_book_id":book_id,
+            "books": current_books,
+            "total_books": len(Book.query.all())
+        })
 
+    except:
+        abort(422)
 
   # @TODO: Write a route that create a new book. 
   #        Response body keys: 'success', 'created'(id of created book), 'books' and 'total_books'
   # TEST: When completed, you will be able to a new book using the form. Try doing so from the last page of books. 
   #       Your new book should show up immediately after you submit it at the end of the page.
-  #@app.route('/books/<int:id>', methods=['POST'])
-  #def add_book(id):
+  @app.route('/books', methods=['POST'])
+  def create_book():
+    body = request.get_json()
+    print(body)
+    
+    #Proceed to book creation and set default to None
+    new_title = body.get('title', None)
+    new_author = body.get('author', None)
+    new_rating = int(body.get('rating', None))
 
+    try:
+        book = Book(title=new_title,author=new_author,rating=new_rating)
+        book.insert()
+
+        #Query the db to GET updated info
+        selection = Book.query.order_by(Book.id).all()
+        current_books = paginate_books(request, selection)
+
+        return jsonify({
+            'success': True,
+            'created': book.id,
+            'current_books':current_books,
+            'total_books':len(Book.query.all())
+        })
+    except:
+        abort(422) 
+                
   
   return app
