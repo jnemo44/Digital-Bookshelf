@@ -129,27 +129,39 @@ def create_app(test_config=None):
   @app.route('/books', methods=['POST'])
   def create_book():
     body = request.get_json()
-    print(body)
     
     #Proceed to book creation and set default to None
     new_title = body.get('title', None)
     new_author = body.get('author', None)
-    new_rating = int(body.get('rating', None))
+    new_rating = body.get('rating', None)
+    search_term = body.get('search',None)
 
+    
     try:
-        book = Book(title=new_title,author=new_author,rating=new_rating)
-        book.insert()
+        if search_term:
+            selection = Book.query.filter(Book.title.ilike('%'+search_term+'%'))
+            current_books = paginate_books(request, selection)
 
-        #Query the db to GET updated info
-        selection = Book.query.order_by(Book.id).all()
-        current_books = paginate_books(request, selection)
+            return jsonify({
+                'success':True,
+                'total_books':len(selection.all()),
+                'books':current_books
+            })
 
-        return jsonify({
-            'success': True,
-            'created': book.id,
-            'current_books':current_books,
-            'total_books':len(Book.query.all())
-        })
+        else:
+            book = Book(title=new_title,author=new_author,rating=new_rating)
+            book.insert()
+
+            #Query the db to GET updated info
+            selection = Book.query.order_by(Book.id).all()
+            current_books = paginate_books(request, selection)
+
+            return jsonify({
+                'success': True,
+                'created': book.id,
+                'current_books':current_books,
+                'total_books':len(Book.query.all())
+            })
     except:
         abort(422)
 

@@ -18,8 +18,8 @@ class BookTestCase(unittest.TestCase):
         setup_db(self.app, self.database_path)
 
         self.new_book = {
-            'title': 'Anansi Boys',
-            'author': 'Neil Gaiman',
+            'title': 'Towards the Future',
+            'author': 'Farty mc Fart',
             'rating': 5
         }
 
@@ -66,7 +66,6 @@ class BookTestCase(unittest.TestCase):
         res = self.client().patch('/books/40000')
         data = json.loads(res.data)
         
-
         self.assertEqual(res.status_code,400)
         self.assertEqual(data['success'],False)
 
@@ -76,9 +75,71 @@ class BookTestCase(unittest.TestCase):
         data = json.loads(res.data)
         book = Book.query.filter(Book.id==1).one_or_none()
 
-        self.assertEqual(data['success'],True)
         self.assertEqual(res.status_code,200)
+        self.assertEqual(data['success'],True)
         self.assertEqual(book.format()['rating'],4)
+
+    #Tests for DELETE method
+    #def test_delete_method(self):
+    #    "Test to make sure delete happens"
+    #    res = self.client().delete('/books/1')
+    #    data = json.loads(res.data)
+
+    #    book = Book.query.filter(Book.id == 1).one_or_none()
+
+     #   self.assertEqual(res.status_code,200)
+      #  self.assertEqual(data['success'],True)
+       # self.assertEqual(data['deleted_book_id'],1)
+        #self.assertEqual(book,None)
+
+    def test_no_book_to_delete(self):
+        "Test to make sure proper function when invalid book is selected"
+        res = self.client().delete('/books/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code,422)
+        self.assertEqual(data['success'],False)
+
+    #Tests for POST method
+    #def test_post_new_book(self):
+    #    "Test to make sure I can add a new book"
+    #    res = self.client().post('/books', json=self.new_book)
+    #    data = json.loads(res.data)
+
+    #    self.assertEqual(res.status_code,200)
+    #    self.assertEqual(data['success'],True)
+    #    self.assertTrue(data['created'])
+
+    #def test_post_invalid(self):
+    #    "Test to make sure an error happens when improper post request sent"
+    #    res = self.client().post('/books/200', json=self.new_book)
+    #    data = json.loads(res.data)
+    #    print(data)
+
+    #    self.assertEqual(res.status_code,405)
+    #    self.assertEqual(data['success'],False)
+
+    #Tests for search endpoints
+    def test_search_exists(self):
+        "Test for search feature"
+        res = self.client().post('/books', json={'search':'y'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code,200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['total_books'])
+        self.assertEqual(len(data['books']),2)
+
+    def test_search_none(self):
+        "No results"
+        res = self.client().post('/books', json={'search':'yellow'})
+        data = json.loads(res.data)
+
+        #Should return successfully even though nothing is found
+        self.assertEqual(res.status_code,200)
+        self.assertEqual(data['success'],True)
+        self.assertEqual(data['total_books'],0)
+        self.assertEqual(len(data['books']), 0)
 
 
 # Make the tests conveniently executable
