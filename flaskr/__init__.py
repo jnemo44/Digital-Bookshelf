@@ -151,7 +151,31 @@ def create_app(test_config=None):
             'total_books':len(Book.query.all())
         })
     except:
-        abort(422) 
+        abort(422)
+
+  @app.errorhandler(400)
+  def bad_request(error):
+      return jsonify({
+          'success':False,
+          'error':400,
+          'message':'Bad Request'
+      }),400
+  
+  @app.errorhandler(404)
+  def not_found(error):
+      return jsonify({
+          'success':False,
+          'error':404,
+          'message':'Resource not found!'
+      }),404
+
+  @app.errorhandler(422)
+  def unprocessable(error):
+      return jsonify({
+          'success':False,
+          'error':422,
+          'message':'Unprocessable'
+      }),422
                 
   
   return app
