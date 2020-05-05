@@ -3,7 +3,7 @@ A way to store and track books you have read and what your personal rating of ea
 
 Currently the project is locally hosted only and relies on a PostgreSQL backend to store your books. Functionality exsists to add, delete, search, and rate books on your shelf.
 
-Future improvements could involve adding a brief description of each book and a front end to display your bookshlef in a more tasteful way.
+Future improvements could involve adding a brief description of each book and a front end to display your bookshelf in a more tasteful way.
 
 ## Getting Started
 Python 3
