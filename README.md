@@ -1,11 +1,11 @@
 # Requests-Lab
 Used for API module of FSND
 
-Getting Started:
+## Getting Started:
 This is an API written to access and store books on a virtual bookshelf. Each book has a title,author, and rating along with an auto generated id.
 Base URL: http://127.0.0.1:5000/
 
-Error Handling:
+## Error Handling:
 Standard HTTP response codes. But these errors are returned as JSON objects in the following format.
 {
     "success":False,
@@ -19,9 +19,9 @@ The API will return these three types when failures occur.
 404 - Resource not found!
 422 - Unprocessable
 
-Endpoint Library:
+## Endpoint Library:
 
-GET /books
+# GET /books
 As a GET request this endpoint returns a list of all the books on the bookshelf. The list is paginated and is a JSON object that looks like this.
 Sample: curl http://127.0.0.1:5000/books
 
@@ -43,7 +43,7 @@ Sample: curl http://127.0.0.1:5000/books
     "success":True
 }
 
-PATCH /books/{book_id}
+# PATCH /books/{book_id}
 As a PATCH method this endpoint will expect the user to pass a new rating in the request for a specific book id.
 Sample: curl http://127.0.0.1:5000/books/15 -X PATCH -H "Content-Type: application/json" -d '{"rating":"1"}'
 
@@ -53,7 +53,7 @@ Sample: curl http://127.0.0.1:5000/books/15 -X PATCH -H "Content-Type: applicati
     "book_updated":book_id
 }
 
-DELETE /books/{book_id}
+# DELETE /books/{book_id}
 Deletes the passed book_id from the bookshelf and returns the following.
 Sample: curl -X DELETE http://127.0.0.1:5000/books/16?page=2
 {
@@ -63,7 +63,7 @@ Sample: curl -X DELETE http://127.0.0.1:5000/books/16?page=2
     "total_books":# of books
 }
 
-/books
+# POST/books
 As a POST method this endpoint will do one of two things.
 1. If a search_term is passed in the body of the request the endpoint will perform a search using the search_term and return the results in the following response format.
 Sample: curl http://127.0.0.1:5000/books -X POST -H "Content-Type: application/json" -d '{"search":"t"}'
